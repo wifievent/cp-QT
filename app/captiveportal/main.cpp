@@ -36,7 +36,16 @@ int main(int argc, char *argv[])
     cp.intfname_ = entry->intf()->name();
     cp.gwIp_ = entry->intf()->gateway();
     cp.redirectpage_ = "http://test.gilgil.net";
+
+	QJsonObject jo = GJson::loadFromFile();
+	if (!jo.isEmpty())
+		jo["cp"] >> cp;
+	jo["cp"] << cp;
+	GJson::saveToFile(jo);
+
+	GThreadMgr::suspendStart();
     cp.open();
+	GThreadMgr::resumeStart();
 
     a.exec();
 

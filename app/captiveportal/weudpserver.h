@@ -2,6 +2,7 @@
 #define WEUDPSERVER_H
 
 #include "udpserver.h"
+#include "stdafx.h"
 
 class WEUdpServer : public UdpServer
 {
@@ -16,7 +17,7 @@ public:
     void start(int port);
     void stop();
 
-    void handleCnt();
+    void handleClnt();
 };
 
 #endif // WEUDPSERVER_H

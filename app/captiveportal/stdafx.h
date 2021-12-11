@@ -19,3 +19,20 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
+
+#include <string.h>
+#include <sys/socket.h>
+#include <errno.h>
+#include <netinet/tcp.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
+
+#include <stdlib.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <signal.h>
+
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <netinet/ether.h>
+#include <unistd.h>

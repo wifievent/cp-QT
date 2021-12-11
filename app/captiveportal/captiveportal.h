@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "werawclient.h"
 
 class CaptivePortal : public GStateObj
 {
@@ -12,11 +13,14 @@ class CaptivePortal : public GStateObj
     GTcpBlock tcpblock_;
     GPcapDeviceWrite writer_;
 
+    WERawClient socket_;
+
     GIp host_;
 
 public:
     QString intfname_;
     QString redirectpage_;
+    GIp myIp_;
     GIp gwIp_;
 
 public:
@@ -25,6 +29,7 @@ public:
 
 private:
     void setComponent();
+    void getIPAddress();
 
 protected:
     bool doOpen() override;

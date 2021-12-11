@@ -24,7 +24,35 @@ void CaptivePortal::setComponent()
     capturer_.intfName_ = intfname_;
     tcpblock_.backwardFinMsg_ = QStringList{"HTTP/1.0 302 Redirect\r\n"
                                             "Location: "+redirectpage_+"\r\n"
-                                            "\r\n"};
+                                                                       "\r\n"};
+}
+
+void CaptivePortal::getIPAddress()
+{
+    uint32_t ipaddr;
+    int sock;
+    struct ifreq ifr;
+    struct sockaddr_in *sin;
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
+    {
+        fprintf(stderr, "%s", "SOCK ERROR");
+        return;
+    }
+
+    strcpy(ifr.ifr_name, qPrintable(intfname_));
+    if (ioctl(sock, SIOCGIFADDR, &ifr)< 0)
+    {
+        fprintf(stderr, "%s", "IOCTL ERROR");
+        ::close(sock);
+        return;
+    }
+    sin = (struct sockaddr_in*)&ifr.ifr_addr;
+    ipaddr = ntohl((sin->sin_addr).s_addr);
+    ::close(sock);
+    myIp_ = GIp(ipaddr);
+    qDebug() << "My Ip Address:" << QString(myIp_);
+    return;
 }
 
 bool CaptivePortal::doOpen()
@@ -56,8 +84,9 @@ bool CaptivePortal::doOpen()
     host_ = GIp(ip);
 	qInfo() << "domain=" << redirectpage_ << "," << "ip=" << QString(host_);
 
-    setComponent();
+    getIPAddress();
 
+    setComponent();
     if(!(writer_.open()))
     {
         qDebug() << "failed to open writer";
@@ -141,8 +170,18 @@ void CaptivePortal::processPacket(GPacket *packet)
 
 	if (tcpHdr->dport() == 443)
     {
-		if (ipHdr->dip() != host_)
-			packet->ctrl.block_ = true;
+        packet->ctrl.block_ = true;
+        GBuf tcpData = packet->tcpData_;
+
+        char* castedtcpdata = reinterpret_cast<char*>(tcpData.data_);
+        qDebug() << "tcpdata:" << castedtcpdata;
+        if (ipHdr->dip() != host_) {
+            qDebug() << "There is tls connection request";
+            socket_.setSocketOpt(myIp_, 5050);
+            socket_.setIpHeader(*ipHdr);
+            socket_.setTcpHeader(*tcpHdr);
+            socket_.send();
+        }
         return;
     }
 

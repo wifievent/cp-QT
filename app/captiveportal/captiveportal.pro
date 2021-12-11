@@ -1,6 +1,4 @@
-QT += widgets
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT -= gui
 
 CONFIG += c++17
 TEMPLATE = app
@@ -11,33 +9,31 @@ include(../../cp.pri)
 
 DESTDIR = $${PWD}/../../bin
 
+LIBS += -L../../../opensocket/lib -lopensocket -lssl -lcrypto -lpthread
+
 SOURCES += \
-    ../../src/socket.cpp \
-    ../../src/udpclient.cpp \
-    ../../src/udpsocket.cpp \
-    ../../src/udpserver.cpp \
     ../../src/httprequest.cpp \
     ../../src/httpresponse.cpp \
-    ../../src/tcpsocket.cpp \
-    ../../src/tcpclient.cpp \
+    ../../../opensocket/src/*.cpp \
+    ../../../opensocket/src/base/*.cpp \
+    werawclient.cpp \
     captiveportal.cpp \
     main.cpp \
+    wesslserver.cpp \
     weudpclient.cpp \
     weudpserver.cpp \
     weupdater.cpp
 
 HEADERS += \
-    ../../src/socket.h \
-    ../../src/udpclient.h \
-    ../../src/udpsocket.h \
-    ../../src/udpserver.h \
     ../../src/httprequest.h \
     ../../src/httpresponse.h \
-    ../../src/tcpsocket.h \
-    ../../src/tcpclient.h \
     ../../src/http.h \
+    ../../../opensocket/src/*.h \
+    ../../../opensocket/src/base/*.h \
+    werawclient.h \
     captiveportal.h \
     stdafx.h \
+    wesslserver.h \
     weudpclient.h \
     weudpserver.h \
     weupdater.h

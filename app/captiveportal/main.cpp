@@ -1,5 +1,6 @@
 #include "weudpclient.h"
 #include "weudpserver.h"
+#include "wesslserver.h"
 #include "captiveportal.h"
 
 const char* version()
@@ -27,8 +28,11 @@ int main(int argc, char *argv[])
         qInfo() << "CaptivePortal Started" << version();
     }
 
-    WEUdpServer ws;
-    ws.start(7284);
+    WEUdpServer wus;
+    wus.start(7284);
+    WESslServer wss;
+    wss.redirectpage_ = "http://test.gilgil.net";
+    wss.start(443, "./certkey-test/server.crt", "./certkey-test/server.key");
 
     GRtmEntry* entry = GNetInfo::instance().rtm().getBestEntry(QString("8.8.8.8"));
 
@@ -37,17 +41,18 @@ int main(int argc, char *argv[])
     cp.gwIp_ = entry->intf()->gateway();
     cp.redirectpage_ = "http://test.gilgil.net";
 
-	QJsonObject jo = GJson::loadFromFile();
-	if (!jo.isEmpty())
-		jo["cp"] >> cp;
-	jo["cp"] << cp;
-	GJson::saveToFile(jo);
+    QJsonObject jo = GJson::loadFromFile();
+    if (!jo.isEmpty())
+        jo["cp"] >> cp;
+    jo["cp"] << cp;
+    GJson::saveToFile(jo);
 
-	GThreadMgr::suspendStart();
+    GThreadMgr::suspendStart();
     cp.open();
-	GThreadMgr::resumeStart();
+    GThreadMgr::resumeStart();
 
     a.exec();
 
-    ws.stop();
+    wss.stop();
+    wus.stop();
 }

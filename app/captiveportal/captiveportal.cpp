@@ -4,9 +4,7 @@ CaptivePortal::CaptivePortal()
 {
 	capturer_.hostDetect_.checkDhcp_ = true;
 	capturer_.hostDetect_.checkArp_ = true;
-	capturer_.hostDetect_.checkIp_ = true;
-
-    capturer_.internalFilter_ = "ether host 2C:8D:B1:E9:43:7D or ether host 64:EE:B7:93:E7:D0";
+    capturer_.hostDetect_.checkIp_ = true;
 
     tcpblock_.backwardBlockType_ = GTcpBlock::Fin;
 

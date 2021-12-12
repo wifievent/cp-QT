@@ -173,13 +173,11 @@ void CaptivePortal::processPacket(GPacket *packet)
 	if (tcpHdr->dport() == 443)
     {
         packet->ctrl.block_ = true;
-        GPacket cpypacket;
-        memcpy(&cpypacket, packet, sizeof(GPacket));
         if (ipHdr->dip() != host_) {
             qDebug() << "There is tls connection request";
             socket_.setSocketOpt(myIp_);
-            socket_.setHeader(&cpypacket);
-            socket_.send(&cpypacket);
+            socket_.setHeader(packet);
+            socket_.send(packet);
         }
         return;
     }

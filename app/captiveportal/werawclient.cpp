@@ -15,8 +15,7 @@ void WERawClient::setSocketOpt(GIp myip) {
 
     memset(&sin_, 0, sizeof(sin_));
     sin_.sin_family = AF_INET;
-    //sin_.sin_addr.s_addr = inet_addr(qPrintable(tlsip));
-    sin_.sin_addr.s_addr = inet_addr("4.4.4.4");
+    sin_.sin_addr.s_addr = inet_addr(qPrintable(tlsip));
 
     int one = 1;
     const int *val = &one;
@@ -37,13 +36,9 @@ void WERawClient::setHeader(GPacket* packet) {
 }
 
 void WERawClient::send(GPacket* packet) {
-    buf_.size_ = 60;
-    buf_.data_ = packet->buf_.data_;
-    char* dataptr = reinterpret_cast<char*>(buf_.data_);
-
     qDebug() << "Sending data to tls server data";
-    show_binary((char*)buf_.data_, buf_.size_);
-    if (sendto(sock_, (char*)buf_.data_, buf_.size_, 0, (struct sockaddr *)&sin_, sizeof(sin_)) < 0) {
+    show_binary((char*)packet->buf_.data_, packet->ipHdr_->len());
+    if (sendto(sock_, (char*)packet->ipHdr_, packet->ipHdr_->len(), 0, (struct sockaddr *)&sin_, sizeof(sin_)) < 0) {
         qDebug() << "sendto failed";
     }
     else {

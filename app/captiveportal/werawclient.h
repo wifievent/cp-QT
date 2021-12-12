@@ -6,7 +6,6 @@ class WERawClient
 {
     int sock_;
     struct sockaddr_in sin_;
-    GBuf buf_;
 
 public:
     WERawClient();

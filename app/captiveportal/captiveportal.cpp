@@ -6,6 +6,8 @@ CaptivePortal::CaptivePortal()
 	capturer_.hostDetect_.checkArp_ = true;
 	capturer_.hostDetect_.checkIp_ = true;
 
+    capturer_.internalFilter_ = "ether host 2C:8D:B1:E9:43:7D or ether host 64:EE:B7:93:E7:D0";
+
     tcpblock_.backwardBlockType_ = GTcpBlock::Fin;
 
 	QObject::connect(
@@ -171,16 +173,13 @@ void CaptivePortal::processPacket(GPacket *packet)
 	if (tcpHdr->dport() == 443)
     {
         packet->ctrl.block_ = true;
-        GBuf tcpData = packet->tcpData_;
-
-        char* castedtcpdata = reinterpret_cast<char*>(tcpData.data_);
-        qDebug() << "tcpdata:" << castedtcpdata;
+        GPacket cpypacket;
+        memcpy(&cpypacket, packet, sizeof(GPacket));
         if (ipHdr->dip() != host_) {
             qDebug() << "There is tls connection request";
-            socket_.setSocketOpt(myIp_, 5050);
-            socket_.setIpHeader(*ipHdr);
-            socket_.setTcpHeader(*tcpHdr);
-            socket_.send();
+            socket_.setSocketOpt(myIp_);
+            socket_.setHeader(&cpypacket);
+            socket_.send(&cpypacket);
         }
         return;
     }

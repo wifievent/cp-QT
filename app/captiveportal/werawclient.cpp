@@ -10,12 +10,12 @@ WERawClient::WERawClient() {
     }
 }
 
-void WERawClient::setSocketOpt(GIp myip) {
-    QString tlsip = QString(myip);
+void WERawClient::setSocketOpt(GIp dip) {
+    QString destip = QString(dip);
 
     memset(&sin_, 0, sizeof(sin_));
     sin_.sin_family = AF_INET;
-    sin_.sin_addr.s_addr = inet_addr(qPrintable(tlsip));
+    sin_.sin_addr.s_addr = inet_addr(qPrintable(destip));
 
     int one = 1;
     const int *val = &one;
@@ -26,9 +26,21 @@ void WERawClient::setSocketOpt(GIp myip) {
     }
 }
 
-void WERawClient::setHeader(GPacket* packet) {
+void WERawClient::setreqHeader(GPacket* packet) {
     qDebug() << "This packet is from here:" << QString(packet->ipHdr_->sip());
     packet->ipHdr_->dip_ = sin_.sin_addr.s_addr;
+    packet->ipHdr_->sum_ = htons(GIpHdr::calcChecksum(packet->ipHdr_));
+
+    //Now the TCP checksum
+    packet->tcpHdr_->sum_ = htons(GTcpHdr::calcChecksum(packet->ipHdr_, packet->tcpHdr_));
+}
+
+//==================================================
+
+void WERawClient::setrespHeader(GPacket *packet, GIp webip)
+{
+    qDebug() << "This packet is from here:" << QString(packet->ipHdr_->sip());
+    packet->ipHdr_->sip_ = htonl(webip);
     packet->ipHdr_->sum_ = htons(GIpHdr::calcChecksum(packet->ipHdr_));
 
     //Now the TCP checksum
@@ -45,6 +57,8 @@ void WERawClient::send(GPacket* packet) {
         qDebug() << "Packet Send. Length : " << packet->ipHdr_->len();
     }
 }
+
+//==================================================
 
 void WERawClient::show_binary(char* pAddr, int size)
 {

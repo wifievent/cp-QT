@@ -13,7 +13,8 @@ public:
 
 public:
     void setSocketOpt(GIp myip);
-    void setHeader(GPacket* packet);
+    void setreqHeader(GPacket* packet);
+    void setrespHeader(GPacket* packet, GIp webip);
     void send(GPacket* packet);
     void show_binary(char* pAddr, int size);
 };

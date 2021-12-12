@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
+#include <map>
 
 #include <string.h>
 #include <sys/socket.h>

@@ -3,6 +3,12 @@
 #include "stdafx.h"
 #include "werawclient.h"
 
+struct ClientData
+{
+    uint16_t port_;
+    GIp webip_;
+};
+
 class CaptivePortal : public GStateObj
 {
     Q_OBJECT
@@ -17,6 +23,8 @@ class CaptivePortal : public GStateObj
 
     GIp host_;
 
+    std::map<GIp, std::vector<ClientData>> dict_;
+
 public:
     QString intfname_;
     QString redirectpage_;
@@ -30,6 +38,10 @@ public:
 private:
     void setComponent();
     void getIPAddress();
+
+    void setClientDict(GIp keyip, GIp webip, uint16_t port);
+    void delClientDict(GIp keyip);
+    GIp getClientDict(GIp keyip, uint16_t port);
 
 protected:
     bool doOpen() override;

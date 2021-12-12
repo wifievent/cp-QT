@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     wus.start(7284);
     WESslServer wss;
     wss.redirectpage_ = "http://test.gilgil.net";
-    wss.start(443, "./certkey-test/server.crt", "./certkey-test/server.key");
+    wss.start(443, "../../bin/certkey-test/server.crt", "../../bin/certkey-test/server.key");
 
     GRtmEntry* entry = GNetInfo::instance().rtm().getBestEntry(QString("8.8.8.8"));
 

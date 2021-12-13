@@ -15,18 +15,23 @@ CaptivePortal::CaptivePortal()
     tcpblock_.backwardBlockType_ = GTcpBlock::Fin;
 
     GCommandItem opencommand;
-    opencommand.commands_ = QStringList{"su -c \"iptables -A OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
+    //opencommand.commands_ = QStringList{"su -c \"iptables -A OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
     filter_.command_.openCommands_.clear();
-    filter_.command_.openCommands_.push_back(opencommand);
+    filter_.command_.closeCommands_.push_back(new GCommandItem(this, QStringList{"su -c \"iptables -A OUTPUT -p tcp -s "
+                                                                                 + QString(myIp_) + " -sport 443 -j ACCEPT\""}
+    ));
+    //filter_.command_.openCommands_.push_back(opencommand);
 
     GCommandItem closecommand;
-    closecommand.commands_ = QStringList{"su -c \"iptables -D OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
+    //closecommand.commands_ = QStringList{"su -c \"iptables -D OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
     filter_.command_.closeCommands_.clear();
-    filter_.command_.closeCommands_.push_back(closecommand);
+    filter_.command_.closeCommands_.push_back(new GCommandItem(this, QStringList{"su -c \"iptables -D OUTPUT -p tcp -s "
+                                                                                 + QString(myIp_) + " -sport 443 -j ACCEPT\""}
+    ));
 
     QObject::connect(
                 &filter_,
-                SIGNAL(captured(GPakcet*)),
+                SIGNAL(captured(GPacket*)),
                 this,
                 SLOT(getSendPacket(GPacket*)),
                 Qt::DirectConnection
@@ -295,6 +300,7 @@ void CaptivePortal::getSendPacket(GPacket *packet)
             qDebug() << "There is tls to client response";
             GIp webip = getClientDict(ipHdr->dip(), tcpHdr->dport());
             forfiltersocket_.setrespHeader(packet, webip);
+            //packet->ctrl.changed_ = true;
             forfiltersocket_.send(packet);
         }
         return;

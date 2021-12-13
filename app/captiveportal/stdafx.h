@@ -38,3 +38,7 @@
 #include <sys/ioctl.h>
 #include <netinet/ether.h>
 #include <unistd.h>
+
+#include <linux/types.h>
+#include <linux/netfilter.h>
+#include <libnetfilter_queue/libnetfilter_queue.h>

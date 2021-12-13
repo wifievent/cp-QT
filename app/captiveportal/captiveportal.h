@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "werawclient.h"
+#include "wenetfilter.h"
 
 struct ClientData
 {
@@ -26,7 +27,6 @@ class CaptivePortal : public GStateObj
     WERawClient forfiltersocket_;
 
     GIp host_;
-
     dict dict_;
 
 public:

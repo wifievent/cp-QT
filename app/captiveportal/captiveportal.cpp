@@ -15,18 +15,15 @@ CaptivePortal::CaptivePortal()
     tcpblock_.backwardBlockType_ = GTcpBlock::Fin;
 
     GCommandItem opencommand;
-    //opencommand.commands_ = QStringList{"su -c \"iptables -A OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
     filter_.command_.openCommands_.clear();
     filter_.command_.closeCommands_.push_back(new GCommandItem(this, QStringList{"su -c \"iptables -A OUTPUT -p tcp -s "
-                                                                                 + QString(myIp_) + " -sport 443 -j ACCEPT\""}
+                                                                                 + QString(myIp_) + " --sport 443 -j NFQUEUE --queue-num 0\""}
     ));
-    //filter_.command_.openCommands_.push_back(opencommand);
 
     GCommandItem closecommand;
-    //closecommand.commands_ = QStringList{"su -c \"iptables -D OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
     filter_.command_.closeCommands_.clear();
     filter_.command_.closeCommands_.push_back(new GCommandItem(this, QStringList{"su -c \"iptables -D OUTPUT -p tcp -s "
-                                                                                 + QString(myIp_) + " -sport 443 -j ACCEPT\""}
+                                                                                 + QString(myIp_) + " --sport 443 -j NFQUEUE --queue-num 0\""}
     ));
 
     QObject::connect(
@@ -120,6 +117,7 @@ GIp CaptivePortal::getClientDict(GIp keyip, uint16_t port)
 
 void CaptivePortal::showClientDict()
 {
+
 }
 
 bool CaptivePortal::doOpen()
@@ -187,7 +185,7 @@ bool CaptivePortal::doClose()
         qDebug() << "failed to close tcpblock";
         return false;
     }
-    if(!(filter_.open()))
+    if(!(filter_.close()))
     {
         qDebug() << "failed to close filter";
         return false;
@@ -300,7 +298,7 @@ void CaptivePortal::getSendPacket(GPacket *packet)
             qDebug() << "There is tls to client response";
             GIp webip = getClientDict(ipHdr->dip(), tcpHdr->dport());
             forfiltersocket_.setrespHeader(packet, webip);
-            //packet->ctrl.changed_ = true;
+            packet->ctrl.changed_ = true;
             forfiltersocket_.send(packet);
         }
         return;

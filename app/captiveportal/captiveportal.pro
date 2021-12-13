@@ -9,7 +9,7 @@ include(../../cp.pri)
 
 DESTDIR = $${PWD}/../../bin
 
-LIBS += -L../../../opensocket/lib -lopensocket -lssl -lcrypto -lpthread
+LIBS += -L../../../opensocket/lib -lopensocket -lssl -lcrypto -lpthread -lnetfilter_queue
 
 SOURCES += \
     ../../src/httprequest.cpp \

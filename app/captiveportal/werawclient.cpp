@@ -45,29 +45,10 @@ void WERawClient::send(GPacket* packet) {
     sin_.sin_addr.s_addr = packet->ipHdr_->dip_;
 
     qDebug() << "Sending data to tls server data";
-    show_binary((char*)packet->buf_.data_, packet->ipHdr_->len());
     if (sendto(sock_, (char*)packet->ipHdr_, packet->ipHdr_->len(), 0, (struct sockaddr *)&sin_, sizeof(sin_)) < 0) {
         qDebug() << "sendto failed";
     }
     else {
         qDebug() << "Packet Send. Length : " << packet->ipHdr_->len();
     }
-}
-
-//==================================================
-
-void WERawClient::show_binary(char* pAddr, int size)
-{
-    qDebug() << "sizeof print:" << size;
-    char dwBuffer[6];
-    uint8_t dwValue;
-
-    for (int i = 1; i <= size; i++) {
-        dwValue = pAddr[i-1];
-        sprintf(dwBuffer, "%02X ", dwValue);
-        std::cout << dwBuffer;
-        if(i % 16 == 0)
-            std::cout << std::endl;
-    }
-    std::cout << std::endl;
 }

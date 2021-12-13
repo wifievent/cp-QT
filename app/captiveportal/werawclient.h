@@ -15,5 +15,4 @@ public:
     void setreqHeader(GPacket* packet, GIp dip);
     void setrespHeader(GPacket* packet, GIp webip);
     void send(GPacket* packet);
-    void show_binary(char* pAddr, int size);
 };

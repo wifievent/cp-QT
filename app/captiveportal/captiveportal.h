@@ -9,6 +9,8 @@ struct ClientData
     GIp webip_;
 };
 
+typedef std::map<GIp, std::vector<ClientData>> dict;
+
 class CaptivePortal : public GStateObj
 {
     Q_OBJECT
@@ -18,12 +20,14 @@ class CaptivePortal : public GStateObj
     GAutoArpSpoof capturer_;
     GTcpBlock tcpblock_;
     GPcapDeviceWrite writer_;
+    GNetFilter filter_;
 
-    WERawClient socket_;
+    WERawClient forspoofsocket_;
+    WERawClient forfiltersocket_;
 
     GIp host_;
 
-    std::map<GIp, std::vector<ClientData>> dict_;
+    dict dict_;
 
 public:
     QString intfname_;
@@ -42,6 +46,7 @@ private:
     void setClientDict(GIp keyip, GIp webip, uint16_t port);
     void delClientDict(GIp keyip);
     GIp getClientDict(GIp keyip, uint16_t port);
+    void showClientDict();
 
 protected:
     bool doOpen() override;
@@ -53,4 +58,5 @@ public:
 
 public slots:
     void processPacket(GPacket* packet);
+    void getSendPacket(GPacket* packet);
 };

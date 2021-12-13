@@ -34,11 +34,7 @@ int main(int argc, char *argv[])
     wss.redirectpage_ = "http://test.gilgil.net";
     wss.start(443, "../../bin/certkey-test/server.crt", "../../bin/certkey-test/server.key");
 
-    GRtmEntry* entry = GNetInfo::instance().rtm().getBestEntry(QString("8.8.8.8"));
-
     CaptivePortal cp;
-    cp.intfname_ = entry->intf()->name();
-    cp.gwIp_ = entry->intf()->gateway();
     cp.redirectpage_ = "http://test.gilgil.net";
 
     QJsonObject jo = GJson::loadFromFile();

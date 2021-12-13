@@ -2,11 +2,35 @@
 
 CaptivePortal::CaptivePortal()
 {
+    GRtmEntry* entry = GNetInfo::instance().rtm().getBestEntry(QString("8.8.8.8"));
+    intfname_ = entry->intf()->name();
+    gwIp_ = entry->intf()->gateway();
+
+    getIPAddress();
+
 	capturer_.hostDetect_.checkDhcp_ = true;
 	capturer_.hostDetect_.checkArp_ = true;
     capturer_.hostDetect_.checkIp_ = true;
 
     tcpblock_.backwardBlockType_ = GTcpBlock::Fin;
+
+    GCommandItem opencommand;
+    opencommand.commands_ = QStringList{"su -c \"iptables -A OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
+    filter_.command_.openCommands_.clear();
+    filter_.command_.openCommands_.push_back(opencommand);
+
+    GCommandItem closecommand;
+    closecommand.commands_ = QStringList{"su -c \"iptables -D OUTPUT -p tcp -s " + QString(myIp_) + " -sport 443 -j ACCEPT\""};
+    filter_.command_.closeCommands_.clear();
+    filter_.command_.closeCommands_.push_back(closecommand);
+
+    QObject::connect(
+                &filter_,
+                SIGNAL(captured(GPakcet*)),
+                this,
+                SLOT(getSendPacket(GPacket*)),
+                Qt::DirectConnection
+                );
 
 	QObject::connect(
 				&capturer_,
@@ -14,7 +38,7 @@ CaptivePortal::CaptivePortal()
 				this,
 				SLOT(processPacket(GPacket*)),
 				Qt::DirectConnection
-				);
+                );
 
 	tcpblock_.writer_ = &writer_;
 }
@@ -51,7 +75,7 @@ void CaptivePortal::getIPAddress()
     ipaddr = ntohl((sin->sin_addr).s_addr);
     ::close(sock);
     myIp_ = GIp(ipaddr);
-    qDebug() << "My Ip Address:" << QString(myIp_);
+    qInfo() << "My Ip Address:" << QString(myIp_);
     return;
 }
 
@@ -59,13 +83,14 @@ void CaptivePortal::setClientDict(GIp keyip, GIp webip, uint16_t port)
 {
     ClientData target = {port, webip};
     dict_.insert({keyip, std::vector<ClientData>{{port, webip}}});
-    auto it = find(dict_[keyip].begin(), dict_[keyip].end(), target);
-    if (it == dict_[keyip].end()) {
-        dict_[keyip].push_back(target);
+    std::vector<ClientData>::iterator iter;
+    for(iter = dict_[keyip].begin() ; iter!= dict_[keyip].end() ; iter++) {
+        if(iter->port_ == port) {
+            iter->webip_ = webip;
+            return;
+        }
     }
-    else {
-        return;
-    }
+    dict_[keyip].push_back(target);
     return;
 }
 
@@ -86,6 +111,10 @@ GIp CaptivePortal::getClientDict(GIp keyip, uint16_t port)
     }
     qDebug() << "There is no WEBIP";
     return GIp("8.8.8.8");
+}
+
+void CaptivePortal::showClientDict()
+{
 }
 
 bool CaptivePortal::doOpen()
@@ -115,9 +144,7 @@ bool CaptivePortal::doOpen()
 
     QString ip = QString(host);
     host_ = GIp(ip);
-	qInfo() << "domain=" << redirectpage_ << "," << "ip=" << QString(host_);
-
-    getIPAddress();
+    qInfo() << "domain=" << redirectpage_ << "," << "ip=" << QString(host_);
 
     setComponent();
     if(!(writer_.open()))
@@ -128,6 +155,11 @@ bool CaptivePortal::doOpen()
     if(!(tcpblock_.open()))
     {
         qDebug() << "failed to open tcpblock";
+        return false;
+    }
+    if(!(filter_.open()))
+    {
+        qDebug() << "failed to open filter";
         return false;
     }
     if(!(capturer_.open()))
@@ -148,6 +180,11 @@ bool CaptivePortal::doClose()
     if(!(tcpblock_.close()))
     {
         qDebug() << "failed to close tcpblock";
+        return false;
+    }
+    if(!(filter_.open()))
+    {
+        qDebug() << "failed to close filter";
         return false;
     }
     if(!(capturer_.close()))
@@ -207,22 +244,8 @@ void CaptivePortal::processPacket(GPacket *packet)
         if (ipHdr->dip() != host_) {
             qDebug() << "There is client to tls request";
             setClientDict(ipHdr->sip(), ipHdr->dip(), tcpHdr->sport());
-            socket_.setSocketOpt(myIp_);
-            socket_.setreqHeader(packet);
-            socket_.send(packet);
-        }
-        return;
-    }
-
-    if(tcpHdr->sport() == 443 && ipHdr->sip() == myIp_)
-    {
-        packet->ctrl.block_ = true;
-        if (ipHdr->dip() != host_) {
-            qDebug() << "There is tls to client response";
-            GIp webip = getClientDict(ipHdr->dip(), tcpHdr->dport());
-            socket_.setSocketOpt(ipHdr->dip());
-            socket_.setrespHeader(packet, webip);
-            socket_.send(packet);
+            forspoofsocket_.setreqHeader(packet, myIp_);
+            forspoofsocket_.send(packet);
         }
         return;
     }
@@ -256,5 +279,24 @@ void CaptivePortal::processPacket(GPacket *packet)
                 return;
             }
         }
+    }
+}
+
+void CaptivePortal::getSendPacket(GPacket *packet)
+{
+    qDebug() << "Capture Packet from local!";
+    GIpHdr* ipHdr = packet->ipHdr_;
+    GTcpHdr* tcpHdr = packet->tcpHdr_;
+
+    if(tcpHdr->sport() == 443 && ipHdr->sip() == myIp_)
+    {
+        packet->ctrl.block_ = true;
+        if (ipHdr->dip() != host_) {
+            qDebug() << "There is tls to client response";
+            GIp webip = getClientDict(ipHdr->dip(), tcpHdr->dport());
+            forfiltersocket_.setrespHeader(packet, webip);
+            forfiltersocket_.send(packet);
+        }
+        return;
     }
 }

@@ -7,6 +7,7 @@
 #include <GPcapDeviceWrite>
 #include <GApp>
 #include <GJson>
+#include <GNetFilter>
 
 #include <QObject>
 #include <QString>

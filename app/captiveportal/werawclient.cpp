@@ -8,14 +8,6 @@ WERawClient::WERawClient() {
 		perror("Failed to create socket");
 		exit(1);
     }
-}
-
-void WERawClient::setSocketOpt(GIp dip) {
-    QString destip = QString(dip);
-
-    memset(&sin_, 0, sizeof(sin_));
-    sin_.sin_family = AF_INET;
-    sin_.sin_addr.s_addr = inet_addr(qPrintable(destip));
 
     int one = 1;
     const int *val = &one;
@@ -26,9 +18,9 @@ void WERawClient::setSocketOpt(GIp dip) {
     }
 }
 
-void WERawClient::setreqHeader(GPacket* packet) {
+void WERawClient::setreqHeader(GPacket* packet, GIp dip) {
     qDebug() << "This packet is from here:" << QString(packet->ipHdr_->sip());
-    packet->ipHdr_->dip_ = sin_.sin_addr.s_addr;
+    packet->ipHdr_->dip_ = htonl(dip);
     packet->ipHdr_->sum_ = htons(GIpHdr::calcChecksum(packet->ipHdr_));
 
     //Now the TCP checksum
@@ -48,6 +40,10 @@ void WERawClient::setrespHeader(GPacket *packet, GIp webip)
 }
 
 void WERawClient::send(GPacket* packet) {
+    memset(&sin_, 0, sizeof(sin_));
+    sin_.sin_family = AF_INET;
+    sin_.sin_addr.s_addr = packet->ipHdr_->dip_;
+
     qDebug() << "Sending data to tls server data";
     show_binary((char*)packet->buf_.data_, packet->ipHdr_->len());
     if (sendto(sock_, (char*)packet->ipHdr_, packet->ipHdr_->len(), 0, (struct sockaddr *)&sin_, sizeof(sin_)) < 0) {

@@ -2,7 +2,6 @@
 
 #include "stdafx.h"
 #include "werawclient.h"
-#include "wenetfilter.h"
 
 struct ClientData
 {

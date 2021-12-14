@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "werawclient.h"
+#include "wesslserver.h"
 
 struct ClientData
 {
@@ -24,6 +25,7 @@ class CaptivePortal : public GStateObj
 
     WERawClient forspoofsocket_;
     WERawClient forfiltersocket_;
+    WESslServer wss;
 
     GIp host_;
     dict dict_;

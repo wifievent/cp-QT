@@ -150,6 +150,13 @@ bool CaptivePortal::doOpen()
     qInfo() << "domain=" << redirectpage_ << "," << "ip=" << QString(host_);
 
     setComponent();
+
+    wss.redirectpage_ = redirectpage_.toStdString();
+    if(!(wss.start(443, "../../cp-QT/bin/certkey-test/server.crt", "../../cp-QT/bin/certkey-test/server.key")))
+    {
+        qDebug() << "failed to start wesslserver";
+        return false;
+    }
     if(!(writer_.open()))
     {
         qDebug() << "failed to open writer";
@@ -175,6 +182,11 @@ bool CaptivePortal::doOpen()
 
 bool CaptivePortal::doClose()
 {
+    if(!(wss.stop()))
+    {
+        qDebug() << "failed to stop wesslserver";
+        return false;
+    }
     if(!(writer_.close()))
     {
         qDebug() << "failed to close writer";
@@ -239,7 +251,7 @@ void CaptivePortal::processPacket(GPacket *packet)
 	if (tcpHdr == nullptr) {
 		qCritical() << "tcpHdr is null";
 		return;
-	}
+    }
 
     if (tcpHdr->dport() == 443 && ipHdr->dip() != myIp_)
     {

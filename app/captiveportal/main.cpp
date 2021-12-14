@@ -1,7 +1,6 @@
 #include "weudpclient.h"
 #include "weudpserver.h"
-#include "wesslserver.h"
-#include "captiveportal.h"
+#include "weuiserver.h"
 
 const char* version()
 {
@@ -30,25 +29,11 @@ int main(int argc, char *argv[])
 
     WEUdpServer wus;
     wus.start(7284);
-    WESslServer wss;
-    wss.redirectpage_ = "http://test.gilgil.net";
-    wss.start(443, "../../cp-QT/bin/certkey-test/server.crt", "../../cp-QT/bin/certkey-test/server.key");
-
-    CaptivePortal cp;
-    cp.redirectpage_ = "http://test.gilgil.net";
-
-    QJsonObject jo = GJson::loadFromFile();
-    if (!jo.isEmpty())
-        jo["cp"] >> cp;
-    jo["cp"] << cp;
-    GJson::saveToFile(jo);
-
-    GThreadMgr::suspendStart();
-    cp.open();
-    GThreadMgr::resumeStart();
+    WEUIServer uiserver;
+    uiserver.rootdir_ = "/home/kali/cp-QT/app/captiveportal/webui";
+    uiserver.start(80);
 
     a.exec();
-
-    wss.stop();
+    uiserver.stop();
     wus.stop();
 }

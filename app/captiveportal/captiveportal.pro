@@ -16,6 +16,7 @@ SOURCES += \
     ../../src/httpresponse.cpp \
     ../../../opensocket/src/*.cpp \
     ../../../opensocket/src/base/*.cpp \
+    weuiserver.cpp \
     werawclient.cpp \
     captiveportal.cpp \
     main.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     ../../src/http.h \
     ../../../opensocket/src/*.h \
     ../../../opensocket/src/base/*.h \
+    weuiserver.h \
     werawclient.h \
     captiveportal.h \
     stdafx.h \

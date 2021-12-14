@@ -16,7 +16,7 @@ CaptivePortal::CaptivePortal()
 
     GCommandItem opencommand;
     filter_.command_.openCommands_.clear();
-    filter_.command_.closeCommands_.push_back(new GCommandItem(this, QStringList{"su -c \"iptables -A OUTPUT -p tcp -s "
+    filter_.command_.openCommands_.push_back(new GCommandItem(this, QStringList{"su -c \"iptables -A OUTPUT -p tcp -s "
                                                                                  + QString(myIp_) + " --sport 443 -j NFQUEUE --queue-num 0\""}
     ));
 

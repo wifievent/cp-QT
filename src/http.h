@@ -8,3 +8,6 @@ typedef enum {HTTP1_0, HTTP1_1, HTTP_UNSUPPORTED} Protocol;
 #define	CR  '\r'
 #define LF  '\n'
 #define	CRLF    "\r\n"
+
+#include <string>
+#include <vector>

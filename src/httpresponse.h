@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stdafx.h"
 #include "http.h"
 
 class HTTPResponse
@@ -35,4 +34,5 @@ class HTTPResponse
 		size_t getResponseSize();
         std::string* getResponseData();
         std::string updateCursor(size_t& cursorbegin, size_t& cursorend, std::string target, std::string obj, size_t next);
+        void resetData();
 };

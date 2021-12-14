@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stdafx.h"
 #include "http.h"
 
 class HTTPRequest
@@ -41,4 +40,5 @@ class HTTPRequest
 		size_t getRequestSize();
         std::string* getRequestData();
         std::string updateCursor(size_t& cursorbegin, size_t& cursorend, std::string target, std::string obj, size_t next);
+        void resetData();
 };

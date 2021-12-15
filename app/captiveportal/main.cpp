@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     WEUdpServer wus;
     wus.start(7284);
     WEUIServer uiserver;
-    uiserver.rootdir_ = "/home/kali/cp-QT/app/captiveportal/webui";
+    uiserver.rootdir_ = "./webui";
     uiserver.start(80);
 
     a.exec();

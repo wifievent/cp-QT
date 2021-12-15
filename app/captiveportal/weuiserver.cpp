@@ -39,16 +39,16 @@ void WEUIServer::setHttpResponse() {
         uiresponse_.setResponseBody(ui_);
     }
     else if(path == "/Start") {
-        size = 0;
+        size = 5;
         uiresponse_.setResponseBody("start");
         QString pageid = QString::fromStdString(uirequest_.getRequestBody());
-        cp_.redirectpage_ = "http://192.168.1.12:3001/cp/page/render/" + pageid;
+        cp_.redirectpage_ = "https://wifievent.io/api/cp/page/render/" + pageid;
         GThreadMgr::suspendStart();
         cp_.open();
         GThreadMgr::resumeStart();
     }
     else if(path == "/Stop") {
-        size = 0;
+        size = 4;
         uiresponse_.setResponseBody("stop");
         cp_.close();
     }

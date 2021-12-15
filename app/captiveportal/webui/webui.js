@@ -1,5 +1,4 @@
-let url = 'http://wifievent.io/api';
-url = 'http://192.168.1.12:3001';
+let url = 'https://wifievent.io/api';
 
 const webReq = axios.create({
   baseURL: url,

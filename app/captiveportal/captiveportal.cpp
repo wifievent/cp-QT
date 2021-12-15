@@ -8,6 +8,8 @@ CaptivePortal::CaptivePortal()
 
     getIPAddress();
 
+    wss.start(443, "../../cp-QT/bin/certkey-test/server.crt", "../../cp-QT/bin/certkey-test/server.key");
+
 	capturer_.hostDetect_.checkDhcp_ = true;
 	capturer_.hostDetect_.checkArp_ = true;
     capturer_.hostDetect_.checkIp_ = true;
@@ -152,11 +154,7 @@ bool CaptivePortal::doOpen()
     setComponent();
 
     wss.redirectpage_ = redirectpage_.toStdString();
-    if(!(wss.start(443, "../../cp-QT/bin/certkey-test/server.crt", "../../cp-QT/bin/certkey-test/server.key")))
-    {
-        qDebug() << "failed to start wesslserver";
-        return false;
-    }
+
     if(!(writer_.open()))
     {
         qDebug() << "failed to open writer";
@@ -177,16 +175,12 @@ bool CaptivePortal::doOpen()
         qDebug() << "failed to open arpspoof";
         return false;
     }
+    qDebug() << "ALL COMPONENT OPENED!";
     return true;
 }
 
 bool CaptivePortal::doClose()
 {
-    if(!(wss.stop()))
-    {
-        qDebug() << "failed to stop wesslserver";
-        return false;
-    }
     if(!(writer_.close()))
     {
         qDebug() << "failed to close writer";
@@ -207,6 +201,8 @@ bool CaptivePortal::doClose()
         qDebug() << "failed to close arpspoof";
         return false;
     }
+    qDebug() << "ALL COMPONENT CLOSED!";
+    //wss.stop()
     return true;
 }
 
@@ -253,7 +249,20 @@ void CaptivePortal::processPacket(GPacket *packet)
 		return;
     }
 
-    if (tcpHdr->dport() == 443 && ipHdr->dip() != myIp_)
+    if(ipHdr->dip() == host_)
+    {
+        if(tcpHdr->dport() == 443 || tcpHdr->dport() == 80) {
+            return;
+        }
+        if(tcpHdr->dport() == 3001) {
+            qDebug() << "infection off" << QString(ipHdr->sip());
+            capturer_.removeFlows(ipHdr->sip(), gwIp_, gwIp_, ipHdr->sip());
+            delClientDict(ipHdr->sip());
+            return;
+        }
+    }
+
+    if (ipHdr->dip() != myIp_ && tcpHdr->dport() == 443)
     {
         packet->ctrl.block_ = true;
         if (ipHdr->dip() != host_) {
@@ -265,34 +274,17 @@ void CaptivePortal::processPacket(GPacket *packet)
         return;
     }
 
-	if (tcpHdr->dport() == 80)
+    if (tcpHdr->dport() == 80)
     {
-		GBuf tcpData = packet->tcpData_;
-		if(!tcpData.valid())
-			return;
+        GBuf tcpData = packet->tcpData_;
+        if(!tcpData.valid())
+            return;
 
-		const char* castedtcpdata = reinterpret_cast<const char*>(tcpData.data_);
-		if(strncmp(castedtcpdata, "GET ", 4) == 0 && ipHdr->dip() != host_)
+        const char* castedtcpdata = reinterpret_cast<const char*>(tcpData.data_);
+        if(strncmp(castedtcpdata, "GET ", 4) == 0 && ipHdr->dip() != host_)
         {
             qDebug() << "Send redirect page data to client";
             tcpblock_.block(packet);
-        }
-		if(strncmp(castedtcpdata, "POST ", 5) == 0)
-        {
-            std::string api = "infected=false";
-            std::string tcpdata = castedtcpdata;
-			auto it = std::search(tcpdata.begin(), tcpdata.end(), std::boyer_moore_searcher(api.begin(), api.end()));
-            if (it != tcpdata.end())
-            {
-				qDebug() << "infection off" << QString(ipHdr->sip());
-				capturer_.removeFlows(ipHdr->sip(), gwIp_, gwIp_, ipHdr->sip());
-                delClientDict(ipHdr->sip());
-            }
-            else if(it == tcpdata.end())
-            {
-                qDebug() << "infection keep";
-                return;
-            }
         }
     }
 }
@@ -303,7 +295,7 @@ void CaptivePortal::getSendPacket(GPacket *packet)
     GIpHdr* ipHdr = packet->ipHdr_;
     GTcpHdr* tcpHdr = packet->tcpHdr_;
 
-    if(tcpHdr->sport() == 443 && ipHdr->sip() == myIp_)
+    if(ipHdr->sip() == myIp_ && tcpHdr->sport() == 443)
     {
         packet->ctrl.block_ = true;
         if (ipHdr->dip() != host_) {

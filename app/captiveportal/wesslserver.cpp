@@ -13,13 +13,13 @@ void WESslServer::handleClnt(SslClientSocket* clntsock) {
     int len = 0;
     while((len = clntsock->recv(buffer, BUFSIZE)) != -1) {
         if(len == 0) {
-            spdlog::info("clntsock is shutdown");
+            DLOG(INFO) << "clntsock is shutdown";
             return;
         }
-        spdlog::info("recv data from client");
+        DLOG(INFO) << "recv data from client";
         if(strncmp(buffer, "GET ", 4) == 0)
         {
-            spdlog::info("send redirect data to client");
+            DLOG(INFO) << "send redirect data to client";
             clntsock->send(message.data(), message.length() + 1);
         }
     }

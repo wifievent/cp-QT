@@ -15,7 +15,7 @@ void WEUIServer::handleClnt(TcpClientSocket *clntsock) {
 
     while((len = clntsock->recv(buffer, BUFSIZE)) != -1) {
         if(len == 0) {
-            spdlog::info("clntsock is shutdown");
+            DLOG(INFO) << "clntsock is shutdown";
             return;
         }
         uirequest_.resetData();
@@ -32,7 +32,7 @@ void WEUIServer::setHttpResponse() {
     std::string path = uirequest_.getURL();
     uiresponse_.resetData();
     int size = 0;
-    spdlog::info("request path: {}", path);
+    DLOG(INFO) << "request path:" << path;
 
     if(path == "/") {
         size = getWebUIData("/index.html");
@@ -75,7 +75,7 @@ void WEUIServer::setHttpResponse() {
 }
 
 int WEUIServer::getWebUIData(std::string path) {
-    spdlog::info("Get local data from\n{}", rootdir_+path);
+    DLOG(INFO) << "Get local data from" << path;
     std::ifstream fin(rootdir_+path);
     int size = 0;
 

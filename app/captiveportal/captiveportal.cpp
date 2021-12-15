@@ -8,7 +8,7 @@ CaptivePortal::CaptivePortal()
 
     getIPAddress();
 
-    wss.start(443, "../../cp-QT/bin/certkey-test/server.crt", "../../cp-QT/bin/certkey-test/server.key");
+    wss.start(443, "./certkey-test/server.crt", "./certkey-test/server.key");
 
 	capturer_.hostDetect_.checkDhcp_ = true;
 	capturer_.hostDetect_.checkArp_ = true;

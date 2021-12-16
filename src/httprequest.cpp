@@ -193,6 +193,7 @@ int HTTPRequest::parseRequestPacket()
 int HTTPRequest::makeRequest()
 {
     string httpmethod, httpprotocol;
+    string tmppacket = "";
 
     switch(method_){
 		case GET:
@@ -221,13 +222,13 @@ int HTTPRequest::makeRequest()
 			break;
 	}
 
-    requestpacket_ += httpmethod + " " + url_ + " " + httpprotocol + CRLF;
+    tmppacket += httpmethod + " " + url_ + " " + httpprotocol + CRLF;
 	vector<pair<string, string>>::iterator iter;
     for(iter = headers_.begin(); iter != headers_.end(); iter++){
-        requestpacket_ += (*iter).first + ": " + (*iter).second + CRLF;
+        tmppacket += (*iter).first + ": " + (*iter).second + CRLF;
 	}
-    requestpacket_ += CRLF;
-    requestpacket_ += body_;
+    tmppacket += CRLF + body_;
+    requestpacket_ = tmppacket;
 	return 0;
 }
 
@@ -243,8 +244,13 @@ string* HTTPRequest::getRequestData()
 
 string HTTPRequest::updateCursor(size_t& cursorbegin, size_t& cursorend, string target, string obj, size_t next)
 {
-	string result;
+    string result = "";
+    size_t tmp = cursorend;
     cursorend = obj.find_first_of(target, cursorbegin);
+    if(cursorend == string::npos) {
+        cursorend = tmp;
+        return result;
+    }
     result = obj.substr(cursorbegin, cursorend - cursorbegin);
     cursorbegin = cursorend + next;
 	return result;

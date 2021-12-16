@@ -134,7 +134,7 @@ string HTTPResponse::getResponseBody()
 int HTTPResponse::makeResponse()
 {
     string httpprotocol;
-    string tmppacket;
+    string tmppacket = "";
 
     switch(protocol_){
 		case HTTP1_0:
@@ -231,8 +231,13 @@ string* HTTPResponse::getResponseData()
 
 string HTTPResponse::updateCursor(size_t& cursorbegin, size_t& cursorend, string target, string obj, size_t next)
 {
-	string result;
+    string result = "";
+    size_t tmp = cursorend;
     cursorend = obj.find_first_of(target, cursorbegin);
+    if(cursorend == string::npos) {
+        cursorend = tmp;
+        return result;
+    }
     result = obj.substr(cursorbegin, cursorend - cursorbegin);
     cursorbegin = cursorend + next;
 	return result;
@@ -241,5 +246,6 @@ string HTTPResponse::updateCursor(size_t& cursorbegin, size_t& cursorend, string
 void HTTPResponse::resetData()
 {
     responsepacket_ = "";
+    DLOG(INFO) << "response header size:" << headers_.size();
     headers_.clear();
 }

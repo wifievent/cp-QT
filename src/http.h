@@ -11,3 +11,4 @@ typedef enum {HTTP1_0, HTTP1_1, HTTP_UNSUPPORTED} Protocol;
 
 #include <string>
 #include <vector>
+#include <glog/logging.h>

@@ -1,6 +1,6 @@
 QT -= gui
 
-CONFIG += c++17
+CONFIG += c++2a
 TEMPLATE = app
 CONFIG += qt
 

@@ -28,4 +28,5 @@ protected:
     void setHttpResponse();
     int getWebUIData(std::string path);
     std::string getDateTime();
+    bool denyDotDotPacket(std::string path);
 };

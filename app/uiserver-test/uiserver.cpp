@@ -29,15 +29,15 @@ void UIServer::setHttpResponse() {
     int size = 0;
     DLOG(INFO) << "request path:" << path;
 
-//    if(path.ends_with(".css")) {
-//        uiresponse_.setHTTPHeader("Content-Type", "text/css;charset=UTF-8");
-//    }
-//    else if(path.ends_with(".js")) {
-//        uiresponse_.setHTTPHeader("Content-Type", "text/javascript;charset=UTF-8");
-//    }
-//    else {
-//        uiresponse_.setHTTPHeader("Content-Type", "text/html");
-//    }
+    if(path.ends_with(".css")) {
+        uiresponse_.setHTTPHeader("Content-Type", "text/css;charset=UTF-8");
+    }
+    else if(path.ends_with(".js")) {
+        uiresponse_.setHTTPHeader("Content-Type", "text/javascript;charset=UTF-8");
+    }
+    else {
+        uiresponse_.setHTTPHeader("Content-Type", "text/html");
+    }
 
     if(denyDotDotPacket(path)) {
         return;

@@ -34,6 +34,20 @@ void WEUIServer::setHttpResponse() {
     int size = 0;
     DLOG(INFO) << "request path:" << path;
 
+    if(path.ends_with(".css")) {
+        uiresponse_.setHTTPHeader("Content-Type", "text/css;charset=UTF-8");
+    }
+    else if(path.ends_with(".js")) {
+        uiresponse_.setHTTPHeader("Content-Type", "text/javascript;charset=UTF-8");
+    }
+    else {
+        uiresponse_.setHTTPHeader("Content-Type", "text/html");
+    }
+
+    if(denyDotDotPacket(path)) {
+        return;
+    }
+
     if(path == "/") {
         size = getWebUIData("/index.html");
         uiresponse_.setResponseBody(ui_);
@@ -105,3 +119,17 @@ std::string WEUIServer::getDateTime() {
     return dateheader;
 }
 
+bool WEUIServer::denyDotDotPacket(std::string path)
+{
+    if(path.find("..") != std::string::npos) {
+        DLOG(INFO) << "there is .. string from path:" << path;
+        uiresponse_.setProtocol(HTTP1_1);
+        uiresponse_.setStatusCode(403);
+        uiresponse_.setReasonPhrase();
+        uiresponse_.setHTTPHeader("Date", getDateTime());
+        uiresponse_.setHTTPHeader("Server", "UIServer");
+        uiresponse_.makeResponse();
+        return true;
+    }
+    return false;
+}
